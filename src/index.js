@@ -73,6 +73,23 @@ module.exports = function(options) {
   
   var lrServer;
 
+  var httpProxy = require('http-proxy') 
+  var proxy = httpProxy.createProxyServer({});
+   
+  function apiProxy(host, port) {
+    return function(req, res, next) {
+      if(req.url.match(/v3/)) {
+        proxy.web(req, res, {
+          target: 'http://localhost:3000/'
+        });
+      } else {
+        next();
+      }
+    }
+  }
+
+  app.use(apiProxy('localhost', 3000));
+
   if (config.livereload.enable) {
 
     app.use(connectLivereload({
